@@ -1,3 +1,5 @@
+@capability:API
+@feature:Orders
 Feature: Orders CRUD lifecycle
 
   @ordersCrud
