@@ -36,6 +36,12 @@ public class AuthenticateUser implements Task {
                 )
         );
 
+        int registerStatus = SerenityRest.lastResponse().statusCode();
+        if (registerStatus < 200 || registerStatus > 299) {
+            throw new IllegalStateException(
+                "Setup failed: actor self-registration returned " + registerStatus);
+        }
+
         actor.attemptsTo(
                 Post.to(ApiRoutes.LOGIN)
                         .with(request -> request
@@ -47,7 +53,12 @@ public class AuthenticateUser implements Task {
                         )
         );
 
+        int loginStatus = SerenityRest.lastResponse().statusCode();
         String token = SerenityRest.lastResponse().jsonPath().getString("token");
+        if (loginStatus != 200 || token == null || token.isBlank()) {
+            throw new IllegalStateException(
+                "Setup failed: login did not return a valid token");
+        }
         CrudExecutionContext.current().setToken(token);
     }
 }

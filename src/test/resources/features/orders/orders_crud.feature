@@ -15,3 +15,9 @@ Feature: Orders CRUD lifecycle
     Then the delete operation is acknowledged
     And the actor requests the deleted order again
     Then the service reports order not found
+
+  @ordersDeterministic
+  Scenario: Validate repeated isolated executions are deterministic and collision-free
+    Given the api actor is authenticated
+    When the actor executes the orders lifecycle twice with isolated data
+    Then both executions complete without data collisions

@@ -19,10 +19,7 @@ public class OrdersCrudStepDefinitions {
 
     @Given("the api actor is authenticated")
     public void theApiActorIsAuthenticated() {
-        Actor actor = ApiActors.spotlight();
-        actor.attemptsTo(AuthenticateUser.withDefaultCredentials());
-        OrdersCrudAssertions.shouldHaveStatus(actor, 200);
-        OrdersCrudAssertions.shouldContainField(actor, "token");
+        ApiActors.spotlight().attemptsTo(AuthenticateUser.withDefaultCredentials());
     }
 
     @When("the actor creates a new order")
