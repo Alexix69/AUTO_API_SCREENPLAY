@@ -13,7 +13,7 @@ import static io.cucumber.junit.platform.engine.Constants.PLUGIN_PROPERTY_NAME;
 @IncludeEngines("cucumber")
 @SelectClasspathResource("features")
 @ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "com.foodtech.automation.api.screenplay.stepdefinitions")
-@ConfigurationParameter(key = FILTER_TAGS_PROPERTY_NAME, value = "@apiAuthCocineroOrders or @apiAuthMeseroBarTasks")
+@ConfigurationParameter(key = FILTER_TAGS_PROPERTY_NAME, value = "@apiAuthCocineroOrders or @apiAuthMeseroBarTasks or @apiAuthMeseroTasks")
 @ConfigurationParameter(key = PLUGIN_PROPERTY_NAME, value = "net.serenitybdd.cucumber.core.plugin.SerenityReporterParallel,pretty")
 public class AuthorizationTestSuite {
 }

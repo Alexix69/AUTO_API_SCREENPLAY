@@ -23,7 +23,14 @@ public class AuthorizationHooks {
         actor.attemptsTo(AuthenticateUserWithRole.as("MESERO"));
     }
 
-    @After("@apiAuthCocineroOrders or @apiAuthMeseroBarTasks")
+    @Before("@apiAuthMeseroTasks")
+    public void beforeMeseroTasks() {
+        Actor actor = ApiActors.openStage();
+        AuthorizationExecutionContext.init();
+        actor.attemptsTo(AuthenticateUserWithRole.as("MESERO"));
+    }
+
+    @After("@apiAuthCocineroOrders or @apiAuthMeseroBarTasks or @apiAuthMeseroTasks")
     public void afterAuthorizationScenario() {
         AuthorizationExecutionContext.clear();
         ApiActors.closeStage();
