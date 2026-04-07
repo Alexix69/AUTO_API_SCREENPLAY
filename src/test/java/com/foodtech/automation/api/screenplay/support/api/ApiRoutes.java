@@ -12,4 +12,8 @@ public final class ApiRoutes {
     public static String orderById(Long orderId) {
         return ORDERS + "/" + orderId;
     }
+
+    public static String taskStartPath(Long taskId) {
+        return "/api/tasks/" + taskId + "/start";
+    }
 }

@@ -7,6 +7,7 @@ public final class AuthorizationExecutionContext {
     private static final ThreadLocal<AuthorizationExecutionContext> CONTEXT = new ThreadLocal<>();
 
     private String token;
+    private Long taskId;
 
     private AuthorizationExecutionContext() {
     }
@@ -35,5 +36,13 @@ public final class AuthorizationExecutionContext {
 
     public String token() {
         return Objects.requireNonNull(token, "Missing context value: token");
+    }
+
+    public void setTaskId(Long taskId) {
+        this.taskId = taskId;
+    }
+
+    public Long taskId() {
+        return Objects.requireNonNull(taskId, "Missing context value: taskId");
     }
 }
