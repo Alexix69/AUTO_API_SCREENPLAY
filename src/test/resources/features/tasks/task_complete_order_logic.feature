@@ -23,7 +23,7 @@ Feature: Task Complete Endpoint — Order Status Logic and State Validation
   Scenario: Calling complete on a PENDING task returns HTTP 409
     Given a task is in PENDING state and the complete call is made on it
     When the complete-task endpoint is called for the PENDING task
-    Then the API responds with HTTP 409 Conflict
+    Then the API responds with HTTP 409
 
   @concurrentStartRaceCondition
   Scenario: Two simultaneous start calls on the same PENDING task — exactly one succeeds

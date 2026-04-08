@@ -1,5 +1,6 @@
 package com.foodtech.automation.api.screenplay.stepdefinitions.orders;
 
+import com.foodtech.automation.api.screenplay.questions.LastResponseStatus;
 import com.foodtech.automation.api.screenplay.support.actors.ApiActors;
 import com.foodtech.automation.api.screenplay.support.context.CrudExecutionContext;
 import com.foodtech.automation.api.screenplay.tasks.auth.AuthenticateUser;
@@ -13,7 +14,8 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import net.serenitybdd.screenplay.Actor;
 
-import static org.junit.Assert.assertEquals;
+import static net.serenitybdd.screenplay.GivenWhenThen.seeThat;
+import static org.hamcrest.Matchers.equalTo;
 
 public class OrdersCrudStepDefinitions {
 
@@ -31,7 +33,7 @@ public class OrdersCrudStepDefinitions {
     @Then("the order is created with a reusable order id")
     public void theOrderIsCreatedWithAReusableOrderId() {
         Actor actor = ApiActors.spotlight();
-        assertEquals(201, CrudExecutionContext.current().createStatus().intValue());
+        actor.should(seeThat(LastResponseStatus.code(), equalTo(201)));
         CrudExecutionContext.current().orderId();
     }
 

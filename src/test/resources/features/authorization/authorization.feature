@@ -31,3 +31,9 @@ Feature: Role-Based API Endpoint Protection
     Given a COCINERO actor is authenticated with a valid token
     When the actor calls PATCH on a task already in preparation
     Then the API responds with HTTP 409
+
+  @apiInvalidRoleRegistration
+  Scenario: Registration with invalid role string via API returns an error response
+    Given the api actor attempts to register with an invalid role
+    When the registration request is submitted
+    Then the API responds with the expected validation error status

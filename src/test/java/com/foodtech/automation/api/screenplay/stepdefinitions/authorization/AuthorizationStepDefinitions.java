@@ -16,6 +16,14 @@ public class AuthorizationStepDefinitions {
     public void aRoleRestrictedActorIsAuthenticatedAndReady() {
     }
 
+    @Given("the api actor attempts to register with an invalid role")
+    public void theApiActorAttemptsToRegisterWithAnInvalidRole() {
+    }
+
+    @When("the registration request is submitted")
+    public void theRegistrationRequestIsSubmitted() {
+    }
+
     @When("the actor calls POST {string}")
     public void theActorCallsPost(String path) {
         ApiActors.spotlight().attemptsTo(CallUnauthorizedEndpoint.post(path));
@@ -29,5 +37,10 @@ public class AuthorizationStepDefinitions {
     @Then("the API responds with HTTP 403")
     public void theApiRespondsWith403() {
         ApiActors.spotlight().should(seeThat(ResponseStatusIs.equalTo(403), is(true)));
+    }
+
+    @Then("the API responds with the expected validation error status")
+    public void theApiRespondsWithExpectedValidationErrorStatus() {
+        ApiActors.spotlight().should(seeThat(ResponseStatusIs.equalTo(400), is(true)));
     }
 }

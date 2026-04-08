@@ -25,13 +25,14 @@ public class AuthenticateUser implements Task {
         String password = "ApiPass123";
 
         actor.attemptsTo(
-            Post.to("/api/auth/register")
+            Post.to(ApiRoutes.REGISTER)
                 .with(request -> request
                     .contentType("application/json")
                     .body(Map.of(
                         "username", username,
                         "email", email,
-                        "password", password
+                        "password", password,
+                        "role", "MESERO"
                     ))
                 )
         );

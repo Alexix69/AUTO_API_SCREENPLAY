@@ -1,8 +1,8 @@
 package com.foodtech.automation.api.screenplay.stepdefinitions.task;
 
+import com.foodtech.automation.api.screenplay.questions.LastResponseBodyField;
 import com.foodtech.automation.api.screenplay.questions.authorization.ConcurrentStartProducedExactlyOneSuccess;
 import com.foodtech.automation.api.screenplay.questions.authorization.OrderStatusIs;
-import com.foodtech.automation.api.screenplay.questions.authorization.ResponseStatusIs;
 import com.foodtech.automation.api.screenplay.support.actors.ApiActors;
 import com.foodtech.automation.api.screenplay.support.context.AuthorizationExecutionContext;
 import com.foodtech.automation.api.screenplay.tasks.authorization.CallOrderStatusEndpoint;
@@ -14,6 +14,7 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 
 import static net.serenitybdd.screenplay.GivenWhenThen.seeThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
 public class TaskCompletionStepDefinitions {
@@ -53,7 +54,7 @@ public class TaskCompletionStepDefinitions {
 
     @Then("the task status is COMPLETED")
     public void theTaskStatusIsCompleted() {
-        ApiActors.spotlight().should(seeThat(ResponseStatusIs.equalTo(200), is(true)));
+        ApiActors.spotlight().should(seeThat(LastResponseBodyField.valueOf("status"), equalTo("COMPLETED")));
     }
 
     @Then("the order status is not COMPLETED")
@@ -68,11 +69,6 @@ public class TaskCompletionStepDefinitions {
         String orderId = AuthorizationExecutionContext.current().orderId();
         ApiActors.spotlight().attemptsTo(CallOrderStatusEndpoint.forOrder(orderId));
         ApiActors.spotlight().should(seeThat(OrderStatusIs.equalTo("COMPLETED"), is(true)));
-    }
-
-    @Then("the API responds with HTTP 409 Conflict")
-    public void theApiRespondsWith409Conflict() {
-        ApiActors.spotlight().should(seeThat(ResponseStatusIs.equalTo(409), is(true)));
     }
 
     @Then("exactly one response is HTTP 200 and the other is HTTP 409")

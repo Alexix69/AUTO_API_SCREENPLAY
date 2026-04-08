@@ -30,7 +30,7 @@ public class AuthenticateUserWithRole implements Task {
         String password = "AuthPass123";
 
         actor.attemptsTo(
-                Post.to("/api/auth/register")
+                Post.to(ApiRoutes.REGISTER)
                         .with(request -> request
                                 .contentType("application/json")
                                 .body(Map.of(

@@ -89,7 +89,7 @@ public class AuthorizationHooks {
         String cocineroToken = ctx.token();
 
         actor.attemptsTo(
-                Get.resource("/api/tasks/station/HOT_KITCHEN")
+                Get.resource(ApiRoutes.TASKS_BY_HOT_KITCHEN)
                         .with(req -> req.header("Authorization", "Bearer " + cocineroToken))
         );
         Long taskId = findTaskIdForOrder(SerenityRest.lastResponse().jsonPath().getList("$"), orderId);
@@ -126,7 +126,7 @@ public class AuthorizationHooks {
         String cocineroToken = ctx.token();
 
         actor.attemptsTo(
-                Get.resource("/api/tasks/station/HOT_KITCHEN")
+                Get.resource(ApiRoutes.TASKS_BY_HOT_KITCHEN)
                         .with(req -> req.header("Authorization", "Bearer " + cocineroToken))
         );
         Long cocineroTaskId = findTaskIdForOrder(SerenityRest.lastResponse().jsonPath().getList("$"), orderId);
@@ -163,7 +163,7 @@ public class AuthorizationHooks {
         String cocineroToken = loginNewUser(actor, "COCINERO");
 
         actor.attemptsTo(
-                Get.resource("/api/tasks/station/HOT_KITCHEN")
+                Get.resource(ApiRoutes.TASKS_BY_HOT_KITCHEN)
                         .with(req -> req.header("Authorization", "Bearer " + cocineroToken))
         );
         Long cocineroTaskId = findTaskIdForOrder(SerenityRest.lastResponse().jsonPath().getList("$"), orderId);
@@ -216,7 +216,7 @@ public class AuthorizationHooks {
         String cocineroToken = ctx.token();
 
         actor.attemptsTo(
-                Get.resource("/api/tasks/station/HOT_KITCHEN")
+                Get.resource(ApiRoutes.TASKS_BY_HOT_KITCHEN)
                         .with(req -> req.header("Authorization", "Bearer " + cocineroToken))
         );
         Long taskId = findTaskIdForOrder(SerenityRest.lastResponse().jsonPath().getList("$"), orderId);
@@ -245,7 +245,7 @@ public class AuthorizationHooks {
         String token2 = loginNewUser(actor, "COCINERO");
 
         actor.attemptsTo(
-                Get.resource("/api/tasks/station/HOT_KITCHEN")
+                Get.resource(ApiRoutes.TASKS_BY_HOT_KITCHEN)
                         .with(req -> req.header("Authorization", "Bearer " + token1))
         );
         Long taskId = findTaskIdForOrder(SerenityRest.lastResponse().jsonPath().getList("$"), orderId);
@@ -255,7 +255,23 @@ public class AuthorizationHooks {
         ctx.setTaskId(taskId);
     }
 
-    @After("@apiAuthCocineroOrders or @apiAuthMeseroBarTasks or @apiAuthMeseroTasks or @apiCrossRoleStartForbidden or @apiStartAlreadyInPreparationConflict or @apiOrderNotCompletedWhenTasksRemain or @apiOrderCompletedWhenLastTaskDone or @apiCompleteTaskInPendingReturns409 or @concurrentStartRaceCondition")
+    @Before("@apiInvalidRoleRegistration")
+    public void beforeInvalidRoleRegistration() {
+        Actor actor = ApiActors.openStage();
+        actor.attemptsTo(
+                Post.to(ApiRoutes.REGISTER)
+                        .with(req -> req
+                                .contentType("application/json")
+                                .body(Map.of(
+                                        "username", "invalid-role-user",
+                                        "email", "invalid.role@test.com",
+                                        "password", "TestPass123",
+                                        "role", "INVALID_ROLE"
+                                )))
+        );
+    }
+
+    @After("@apiAuthCocineroOrders or @apiAuthMeseroBarTasks or @apiAuthMeseroTasks or @apiCrossRoleStartForbidden or @apiStartAlreadyInPreparationConflict or @apiOrderNotCompletedWhenTasksRemain or @apiOrderCompletedWhenLastTaskDone or @apiCompleteTaskInPendingReturns409 or @concurrentStartRaceCondition or @apiInvalidRoleRegistration")
     public void afterAuthorizationScenario() {
         AuthorizationExecutionContext.clear();
         ApiActors.closeStage();
@@ -266,7 +282,7 @@ public class AuthorizationHooks {
         String email = role.toLowerCase() + "." + suffix + "@foodtech.com";
         String password = "Pass" + suffix.substring(0, 6);
         actor.attemptsTo(
-                Post.to("/api/auth/register")
+                Post.to(ApiRoutes.REGISTER)
                         .with(req -> req
                                 .contentType("application/json")
                                 .body(Map.of("username", role.toLowerCase() + suffix,
