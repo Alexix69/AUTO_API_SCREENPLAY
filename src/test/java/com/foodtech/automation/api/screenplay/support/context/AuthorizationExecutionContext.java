@@ -8,6 +8,8 @@ public final class AuthorizationExecutionContext {
 
     private String token;
     private Long taskId;
+    private String secondToken;
+    private String orderId;
 
     private AuthorizationExecutionContext() {
     }
@@ -44,5 +46,21 @@ public final class AuthorizationExecutionContext {
 
     public Long taskId() {
         return Objects.requireNonNull(taskId, "Missing context value: taskId");
+    }
+
+    public void setSecondToken(String secondToken) {
+        this.secondToken = secondToken;
+    }
+
+    public String secondToken() {
+        return Objects.requireNonNull(secondToken, "Missing context value: secondToken");
+    }
+
+    public void setOrderId(String orderId) {
+        this.orderId = orderId;
+    }
+
+    public String orderId() {
+        return Objects.requireNonNull(orderId, "Missing context value: orderId");
     }
 }

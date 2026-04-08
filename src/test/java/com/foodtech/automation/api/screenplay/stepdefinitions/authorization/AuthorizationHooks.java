@@ -102,7 +102,160 @@ public class AuthorizationHooks {
         ctx.setTaskId(taskId);
     }
 
-    @After("@apiAuthCocineroOrders or @apiAuthMeseroBarTasks or @apiAuthMeseroTasks or @apiCrossRoleStartForbidden or @apiStartAlreadyInPreparationConflict")
+    @Before("@apiOrderNotCompletedWhenTasksRemain")
+    public void beforeOrderNotCompletedWhenTasksRemain() {
+        Actor actor = ApiActors.openStage();
+        AuthorizationExecutionContext ctx = AuthorizationExecutionContext.init();
+
+        String meseroToken = loginNewUser(actor, "MESERO");
+
+        actor.attemptsTo(
+                Post.to(ApiRoutes.ORDERS)
+                        .with(req -> req
+                                .contentType("application/json")
+                                .header("Authorization", "Bearer " + meseroToken)
+                                .body(Map.of("tableNumber", "T-C901", "products",
+                                        List.of(
+                                                Map.of("name", "Paella", "type", "HOT_DISH"),
+                                                Map.of("name", "Mojito", "type", "DRINK")
+                                        ))))
+        );
+        long orderId = SerenityRest.lastResponse().jsonPath().getLong("orderId");
+
+        actor.attemptsTo(AuthenticateUserWithRole.as("COCINERO"));
+        String cocineroToken = ctx.token();
+
+        actor.attemptsTo(
+                Get.resource("/api/tasks/station/HOT_KITCHEN")
+                        .with(req -> req.header("Authorization", "Bearer " + cocineroToken))
+        );
+        Long cocineroTaskId = findTaskIdForOrder(SerenityRest.lastResponse().jsonPath().getList("$"), orderId);
+
+        actor.attemptsTo(
+                Patch.to(ApiRoutes.taskStartPath(cocineroTaskId))
+                        .with(req -> req.header("Authorization", "Bearer " + cocineroToken))
+        );
+
+        ctx.setTaskId(cocineroTaskId);
+        ctx.setOrderId(String.valueOf(orderId));
+    }
+
+    @Before("@apiOrderCompletedWhenLastTaskDone")
+    public void beforeOrderCompletedWhenLastTaskDone() {
+        Actor actor = ApiActors.openStage();
+        AuthorizationExecutionContext ctx = AuthorizationExecutionContext.init();
+
+        String meseroToken = loginNewUser(actor, "MESERO");
+
+        actor.attemptsTo(
+                Post.to(ApiRoutes.ORDERS)
+                        .with(req -> req
+                                .contentType("application/json")
+                                .header("Authorization", "Bearer " + meseroToken)
+                                .body(Map.of("tableNumber", "T-C902", "products",
+                                        List.of(
+                                                Map.of("name", "Paella", "type", "HOT_DISH"),
+                                                Map.of("name", "Mojito", "type", "DRINK")
+                                        ))))
+        );
+        long orderId = SerenityRest.lastResponse().jsonPath().getLong("orderId");
+
+        String cocineroToken = loginNewUser(actor, "COCINERO");
+
+        actor.attemptsTo(
+                Get.resource("/api/tasks/station/HOT_KITCHEN")
+                        .with(req -> req.header("Authorization", "Bearer " + cocineroToken))
+        );
+        Long cocineroTaskId = findTaskIdForOrder(SerenityRest.lastResponse().jsonPath().getList("$"), orderId);
+
+        actor.attemptsTo(
+                Patch.to(ApiRoutes.taskStartPath(cocineroTaskId))
+                        .with(req -> req.header("Authorization", "Bearer " + cocineroToken))
+        );
+        actor.attemptsTo(
+                Patch.to(ApiRoutes.taskCompletePath(cocineroTaskId))
+                        .with(req -> req.header("Authorization", "Bearer " + cocineroToken))
+        );
+
+        actor.attemptsTo(AuthenticateUserWithRole.as("BARTENDER"));
+        String bartenderToken = ctx.token();
+
+        actor.attemptsTo(
+                Get.resource(ApiRoutes.TASKS_BY_BAR_STATION)
+                        .with(req -> req.header("Authorization", "Bearer " + bartenderToken))
+        );
+        Long bartenderTaskId = findTaskIdForOrder(SerenityRest.lastResponse().jsonPath().getList("$"), orderId);
+
+        actor.attemptsTo(
+                Patch.to(ApiRoutes.taskStartPath(bartenderTaskId))
+                        .with(req -> req.header("Authorization", "Bearer " + bartenderToken))
+        );
+
+        ctx.setTaskId(bartenderTaskId);
+        ctx.setOrderId(String.valueOf(orderId));
+    }
+
+    @Before("@apiCompleteTaskInPendingReturns409")
+    public void beforeCompleteTaskInPendingReturns409() {
+        Actor actor = ApiActors.openStage();
+        AuthorizationExecutionContext ctx = AuthorizationExecutionContext.init();
+
+        String meseroToken = loginNewUser(actor, "MESERO");
+
+        actor.attemptsTo(
+                Post.to(ApiRoutes.ORDERS)
+                        .with(req -> req
+                                .contentType("application/json")
+                                .header("Authorization", "Bearer " + meseroToken)
+                                .body(Map.of("tableNumber", "T-C903", "products",
+                                        List.of(Map.of("name", "Paella", "type", "HOT_DISH")))))
+        );
+        long orderId = SerenityRest.lastResponse().jsonPath().getLong("orderId");
+
+        actor.attemptsTo(AuthenticateUserWithRole.as("COCINERO"));
+        String cocineroToken = ctx.token();
+
+        actor.attemptsTo(
+                Get.resource("/api/tasks/station/HOT_KITCHEN")
+                        .with(req -> req.header("Authorization", "Bearer " + cocineroToken))
+        );
+        Long taskId = findTaskIdForOrder(SerenityRest.lastResponse().jsonPath().getList("$"), orderId);
+
+        ctx.setTaskId(taskId);
+    }
+
+    @Before("@concurrentStartRaceCondition")
+    public void beforeConcurrentStartRaceCondition() {
+        Actor actor = ApiActors.openStage();
+        AuthorizationExecutionContext ctx = AuthorizationExecutionContext.init();
+
+        String meseroToken = loginNewUser(actor, "MESERO");
+
+        actor.attemptsTo(
+                Post.to(ApiRoutes.ORDERS)
+                        .with(req -> req
+                                .contentType("application/json")
+                                .header("Authorization", "Bearer " + meseroToken)
+                                .body(Map.of("tableNumber", "T-C904", "products",
+                                        List.of(Map.of("name", "Paella", "type", "HOT_DISH")))))
+        );
+        long orderId = SerenityRest.lastResponse().jsonPath().getLong("orderId");
+
+        String token1 = loginNewUser(actor, "COCINERO");
+        String token2 = loginNewUser(actor, "COCINERO");
+
+        actor.attemptsTo(
+                Get.resource("/api/tasks/station/HOT_KITCHEN")
+                        .with(req -> req.header("Authorization", "Bearer " + token1))
+        );
+        Long taskId = findTaskIdForOrder(SerenityRest.lastResponse().jsonPath().getList("$"), orderId);
+
+        ctx.setToken(token1);
+        ctx.setSecondToken(token2);
+        ctx.setTaskId(taskId);
+    }
+
+    @After("@apiAuthCocineroOrders or @apiAuthMeseroBarTasks or @apiAuthMeseroTasks or @apiCrossRoleStartForbidden or @apiStartAlreadyInPreparationConflict or @apiOrderNotCompletedWhenTasksRemain or @apiOrderCompletedWhenLastTaskDone or @apiCompleteTaskInPendingReturns409 or @concurrentStartRaceCondition")
     public void afterAuthorizationScenario() {
         AuthorizationExecutionContext.clear();
         ApiActors.closeStage();

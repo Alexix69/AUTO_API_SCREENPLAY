@@ -16,4 +16,12 @@ public final class ApiRoutes {
     public static String taskStartPath(Long taskId) {
         return "/api/tasks/" + taskId + "/start";
     }
+
+    public static String taskCompletePath(Long taskId) {
+        return "/api/tasks/" + taskId + "/complete";
+    }
+
+    public static String orderStatusPath(String orderId) {
+        return "/api/orders/" + orderId + "/status";
+    }
 }
